@@ -1,0 +1,774 @@
+'use client';
+
+import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { FinancialHealthResult, ResilienceRating } from '@/types';
+import { cn } from '@/lib/utils';
+import { 
+  ShieldAlert, 
+  CheckCircle2, 
+  AlertTriangle, 
+  ArrowRight, 
+  ArrowLeft, 
+  Sparkles, 
+  Printer, 
+  RotateCcw 
+} from 'lucide-react';
+
+const formSchema = z.object({
+  monthlyIncome: z.number({
+    required_error: 'Pendapatan bulanan wajib diisi',
+    invalid_type_error: 'Masukkan nominal angka yang valid',
+  }).min(1000000, 'Minimal pendapatan Rp 1.000.000'),
+  incomeStability: z.enum(['stable_salary', 'variable_freelance', 'micro_business', 'gig_worker'], {
+    required_error: 'Pilih jenis stabilitas pendapatan Anda',
+  }),
+  monthlyMandatoryExpense: z.number({
+    required_error: 'Pengeluaran wajib bulanan wajib diisi',
+    invalid_type_error: 'Masukkan nominal angka yang valid',
+  }).min(500000, 'Minimal pengeluaran Rp 500.000'),
+  currentEmergencySavings: z.number({
+    required_error: 'Total tabungan darurat wajib diisi (isi 0 jika belum ada)',
+    invalid_type_error: 'Masukkan nominal angka yang valid',
+  }).min(0, 'Nominal tidak boleh minus'),
+  employmentStatus: z.enum(['permanent_employee', 'contract_worker', 'freelancer_gig', 'small_business_owner', 'informal'], {
+    required_error: 'Pilih status pekerjaan Anda',
+  }),
+  dependentsCount: z.number({
+    required_error: 'Jumlah tanggungan wajib diisi',
+    invalid_type_error: 'Masukkan angka tanggungan (0 jika mandiri)',
+  }).min(0, 'Minimal 0 tanggungan').max(15, 'Maksimal 15 tanggungan'),
+  totalActiveDebts: z.number({
+    required_error: 'Total cicilan/hutang bulanan wajib diisi (isi 0 jika tidak ada)',
+    invalid_type_error: 'Masukkan nominal angka yang valid',
+  }).min(0, 'Nominal tidak boleh minus'),
+  biggestRiskConcern: z.enum(['layoff_loss_of_income', 'medical_emergency', 'inflation_living_costs', 'debt_predator_trap'], {
+    required_error: 'Pilih faktor kekhawatiran terbesar Anda',
+  }),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+export const HealthCheckForm: React.FC = () => {
+  const [currentStep, setCurrentStep] = useState<number>(1);
+  const [assessmentResult, setAssessmentResult] = useState<FinancialHealthResult | null>(null);
+
+  const {
+    register,
+    handleSubmit,
+    trigger,
+    getValues,
+    reset,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    mode: 'onBlur',
+    defaultValues: {
+      monthlyIncome: 6500000,
+      incomeStability: 'stable_salary',
+      monthlyMandatoryExpense: 4200000,
+      currentEmergencySavings: 5000000,
+      employmentStatus: 'contract_worker',
+      dependentsCount: 2,
+      totalActiveDebts: 1200000,
+      biggestRiskConcern: 'layoff_loss_of_income',
+    },
+  });
+
+  const calculateResult = (data: FormValues): FinancialHealthResult => {
+    const expense = data.monthlyMandatoryExpense || 1;
+    const runwayMonths = Math.round((data.currentEmergencySavings / expense) * 10) / 10;
+    const debtRatio = Math.round((data.totalActiveDebts / data.monthlyIncome) * 100);
+
+    let score = 50;
+
+    if (runwayMonths < 1) score -= 25;
+    else if (runwayMonths < 3) score -= 5;
+    else if (runwayMonths >= 6) score += 25;
+    else score += 15;
+
+    if (debtRatio > 40) score -= 20;
+    else if (debtRatio > 25) score -= 10;
+    else if (debtRatio <= 15) score += 10;
+
+    if (data.dependentsCount >= 3 && data.monthlyIncome < 7000000) {
+      score -= 10;
+    }
+
+    if (data.employmentStatus === 'permanent_employee') score += 10;
+    else if (data.employmentStatus === 'informal' || data.employmentStatus === 'freelancer_gig') score -= 8;
+
+    const finalScore = Math.max(12, Math.min(96, score));
+
+    let rating: ResilienceRating = 'vulnerable';
+    let ratingLabel = 'Rentan (High Economic Shock Risk)';
+    let vulnIndex: 'Tinggi' | 'Moderat' | 'Rendah' = 'Tinggi';
+
+    if (finalScore >= 75) {
+      rating = 'strong';
+      ratingLabel = 'Kuat (Resilient Fortress)';
+      vulnIndex = 'Rendah';
+    } else if (finalScore >= 45) {
+      rating = 'moderate';
+      ratingLabel = 'Sedang (Moderate Resilience)';
+      vulnIndex = 'Moderat';
+    }
+
+    const recommendations = [];
+    const actionPlan = [];
+
+    if (runwayMonths < 3) {
+      recommendations.push({
+        priority: 'Segera' as const,
+        title: 'Bentuk Buffer Likuid 3 Bulan Pertama',
+        description: `Cadangan kas Anda saat ini hanya bertahan ${runwayMonths} bulan. Gunakan modul auto-split tabungan harian Rp 15.000/hari di instrumen likuid aman.`,
+        pillarId: 'emergency-planning',
+      });
+      actionPlan.push('Sisihkan otomatis 10% dari pendapatan harian/bulanan ke rekening terpisah sebelum belanja.');
+    }
+
+    if (debtRatio > 30) {
+      recommendations.push({
+        priority: 'Segera' as const,
+        title: 'Restrukturisasi Beban Cicilan & Stop Utang Baru',
+        description: `Beban hutang Anda mencapai ${debtRatio}% dari pendapatan (batas aman 30%). Lakukan konsolidasi hutang etis tanpa rentenir/pinjol.`,
+        pillarId: 'ethical-micro-financing',
+      });
+      actionPlan.push('Petakan seluruh pokok cicilan dan prioritaskan melunasi bunga tertinggi dengan metode avalanche/snowball.');
+    }
+
+    if (data.biggestRiskConcern === 'medical_emergency' || data.biggestRiskConcern === 'layoff_loss_of_income') {
+      recommendations.push({
+        priority: 'Penting' as const,
+        title: 'Aktifkan Proteksi Arus Kas (Asuransi Mikro Resilio)',
+        description: 'Amankan santunan rawat inap harian Rp 250.000/hari dan tunjangan transisi nafkah dengan premi mikro terjangkau.',
+        pillarId: 'micro-insurance',
+      });
+      actionPlan.push('Pastikan BPJS Kesehatan aktif dan lengkapi dengan santunan mikro pengganti nafkah dapur harian.');
+    }
+
+    if (data.incomeStability === 'variable_freelance' || data.incomeStability === 'micro_business') {
+      recommendations.push({
+        priority: 'Optimalisasi' as const,
+        title: 'Diversifikasi Sumber Nafkah & Upskilling Kilat',
+        description: 'Ikuti program upskilling 14 hari Resilio untuk membuka saluran pendapatan alternatif (side-income).',
+        pillarId: 'upskilling-income',
+      });
+      actionPlan.push('Luangkan 4 jam per minggu untuk meningkatkan keahlian digital atau vokasi siap kerja.');
+    }
+
+    if (recommendations.length < 2) {
+      recommendations.push({
+        priority: 'Optimalisasi' as const,
+        title: 'Ikut Serta dalam Simpanan Gotong Royong Komunitas',
+        description: 'Perkuat jaringan pengaman sosial bersama warga lingkungan RT/RW untuk mitigasi musibah kolektif.',
+        pillarId: 'community-fund',
+      });
+    }
+
+    const summaryMessage = 
+      rating === 'vulnerable'
+        ? 'Peringatan Dini: Posisi keuangan Anda sangat sensitif terhadap shock ekonomi tak terduga (seperti PHK atau biaya medis mendadak). Tindakan pencegahan perlu segera dilakukan dalam 30 hari ke depan.'
+        : rating === 'moderate'
+        ? 'Kondisi Finansial Cukup Stabil, namun masih memiliki celah resiliensi jika terjadi penurunan pendapatan mendadak. Tingkatkan cash buffer dan proteksi mikro.'
+        : 'Selamat! Struktur keuangan keluarga Anda berada di zona aman dan tangguh menghadapi gejolak ekonomi. Terus pertahankan kedisiplinan dan bantu komunitas sekitar Anda.';
+
+    return {
+      score: finalScore,
+      rating,
+      ratingLabel,
+      emergencyRunwayMonths: runwayMonths,
+      debtToIncomeRatio: debtRatio,
+      vulnerabilityIndex: vulnIndex,
+      summaryMessage,
+      recommendations,
+      monthlyActionPlan: actionPlan,
+    };
+  };
+
+  const handleNextStep = async () => {
+    let fieldsToValidate: (keyof FormValues)[] = [];
+    if (currentStep === 1) fieldsToValidate = ['monthlyIncome', 'incomeStability'];
+    if (currentStep === 2) fieldsToValidate = ['monthlyMandatoryExpense', 'currentEmergencySavings'];
+    if (currentStep === 3) fieldsToValidate = ['employmentStatus', 'dependentsCount', 'totalActiveDebts'];
+    if (currentStep === 4) fieldsToValidate = ['biggestRiskConcern'];
+
+    const stepValid = await trigger(fieldsToValidate);
+    if (stepValid) {
+      if (currentStep < 4) {
+        setCurrentStep((prev) => prev + 1);
+      } else {
+        const values = getValues();
+        const res = calculateResult(values);
+        setAssessmentResult(res);
+      }
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep((prev) => prev - 1);
+    }
+  };
+
+  const handleReset = () => {
+    reset();
+    setCurrentStep(1);
+    setAssessmentResult(null);
+  };
+
+  const handlePrint = () => {
+    if (typeof window !== 'undefined') {
+      window.print();
+    }
+  };
+
+  return (
+    <section id="health-check" className="py-16 sm:py-24 bg-resilio-mint-50/50 border-b border-resilio-mint-200">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* Section Header */}
+        <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-resilio-emerald-800 text-white text-xs font-bold uppercase tracking-wider">
+            <ShieldAlert className="w-3.5 h-3.5 text-resilio-cyanSoft-300" />
+            <span>Diagnosa Mandiri Risk-Free</span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl font-black text-resilio-emerald-800 tracking-tight">
+            Early Warning System: Cek Kesehatan Finansial
+          </h2>
+
+          <p className="text-sm sm:text-base text-resilio-emerald-950/80 font-normal">
+            Ketahui ketahanan finansial keluarga Anda saat shock ekonomi melanda melalui 4 langkah mudah berbasis algoritma rasio likuiditas riil.
+          </p>
+        </div>
+
+        {/* Card Container */}
+        <div className="bg-white rounded-3xl shadow-elevated border border-resilio-mint-200 overflow-hidden">
+          
+          {!assessmentResult ? (
+            <div>
+              {/* Accessible Step Progress Tracker */}
+              <nav aria-label="Progress Tahapan Form" className="bg-resilio-mint-50/80 border-b border-resilio-mint-200 px-6 py-4">
+                <ol className="grid grid-cols-4 gap-2 text-center text-xs">
+                  {[
+                    { step: 1, title: 'Pendapatan' },
+                    { step: 2, title: 'Pengeluaran & Kas' },
+                    { step: 3, title: 'Status & Tanggungan' },
+                    { step: 4, title: 'Faktor Risiko' },
+                  ].map((s) => {
+                    const isActive = currentStep === s.step;
+                    const isCompleted = currentStep > s.step;
+
+                    return (
+                      <li
+                        key={s.step}
+                        aria-current={isActive ? 'step' : undefined}
+                        className={`flex flex-col items-center gap-1 font-semibold transition-colors ${
+                          isActive
+                            ? 'text-resilio-emerald-800 font-bold'
+                            : isCompleted
+                            ? 'text-resilio-cyanSoft-600'
+                            : 'text-resilio-mint-400'
+                        }`}
+                      >
+                        <div
+                          className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all ${
+                            isActive
+                              ? 'bg-resilio-cyanSoft-500 text-white shadow-sm ring-2 ring-resilio-cyanSoft-300'
+                              : isCompleted
+                              ? 'bg-resilio-emerald-800 text-white'
+                              : 'bg-resilio-mint-200 text-resilio-emerald-800'
+                          }`}
+                        >
+                          {isCompleted ? '✓' : s.step}
+                        </div>
+                        <span className="hidden sm:inline">{s.title}</span>
+                      </li>
+                    );
+                  })}
+                </ol>
+              </nav>
+
+              {/* Form Content Area */}
+              <form onSubmit={handleSubmit(handleNextStep)} className="p-6 sm:p-10 space-y-6">
+                
+                {/* STEP 1: Pendapatan & Stabilitas */}
+                {currentStep === 1 && (
+                  <fieldset className="space-y-6">
+                    <legend className="text-lg font-bold text-resilio-emerald-900 mb-2">
+                      Langkah 1: Pendapatan Bulanan &amp; Sumber Penghasilan
+                    </legend>
+                    <p className="text-xs text-resilio-emerald-700 -mt-2">
+                      Masukkan estimasi pendapatan bersih rata-rata per bulan seluruh pencari nafkah di keluarga Anda.
+                    </p>
+
+                    <div className="space-y-2">
+                      <label htmlFor="monthlyIncome" className="block text-sm font-bold text-resilio-emerald-900">
+                        Total Pendapatan Bulanan Bersih (Rp) <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        id="monthlyIncome"
+                        type="number"
+                        inputMode="numeric"
+                        {...register('monthlyIncome', { valueAsNumber: true })}
+                        placeholder="Contoh: 6500000"
+                        className={`w-full px-4 py-3 rounded-xl border text-base font-semibold text-resilio-emerald-900 transition-all ${
+                          errors.monthlyIncome
+                            ? 'border-rose-500 bg-rose-50/40 focus:ring-rose-200'
+                            : 'border-resilio-mint-300 focus:border-resilio-cyanSoft-500 focus:ring-resilio-mint-200'
+                        }`}
+                        aria-describedby={errors.monthlyIncome ? 'monthlyIncome-error' : undefined}
+                      />
+                      {errors.monthlyIncome && (
+                        <p id="monthlyIncome-error" className="text-xs font-semibold text-rose-600 flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          {errors.monthlyIncome.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="incomeStability" className="block text-sm font-bold text-resilio-emerald-900">
+                        Pola Stabilitas Arus Pendapatan <span className="text-rose-500">*</span>
+                      </label>
+                      <select
+                        id="incomeStability"
+                        {...register('incomeStability')}
+                        className="w-full px-4 py-3 rounded-xl border border-resilio-mint-300 bg-white text-sm font-medium text-resilio-emerald-900 focus:border-resilio-cyanSoft-500 focus:ring-resilio-mint-200"
+                      >
+                        <option value="stable_salary">Gaji Tetap Bulanan (PNS / Karyawan Tetap Swasta)</option>
+                        <option value="variable_freelance">Pekerja Lepas / Komisi (Penghasilan Naik Turun)</option>
+                        <option value="micro_business">Usaha Mikro / Toko / Dagang Harian</option>
+                        <option value="gig_worker">Mitra Ojek Online / Kurir Logistik</option>
+                      </select>
+                    </div>
+                  </fieldset>
+                )}
+
+                {/* STEP 2: Pengeluaran Wajib & Dana Darurat */}
+                {currentStep === 2 && (
+                  <fieldset className="space-y-6">
+                    <legend className="text-lg font-bold text-resilio-emerald-900 mb-2">
+                      Langkah 2: Pengeluaran Wajib &amp; Cadangan Kas Saat Ini
+                    </legend>
+                    <p className="text-xs text-resilio-emerald-700 -mt-2">
+                      Pengeluaran wajib adalah biaya bertahan hidup dasar: makanan, kontrakan/listrik, susu anak, obat rutin.
+                    </p>
+
+                    <div className="space-y-2">
+                      <label htmlFor="monthlyMandatoryExpense" className="block text-sm font-bold text-resilio-emerald-900">
+                        Pengeluaran Wajib Bulanan (Rp) <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        id="monthlyMandatoryExpense"
+                        type="number"
+                        inputMode="numeric"
+                        {...register('monthlyMandatoryExpense', { valueAsNumber: true })}
+                        placeholder="Contoh: 4200000"
+                        className={`w-full px-4 py-3 rounded-xl border text-base font-semibold text-resilio-emerald-900 transition-all ${
+                          errors.monthlyMandatoryExpense
+                            ? 'border-rose-500 bg-rose-50/40'
+                            : 'border-resilio-mint-300 focus:border-resilio-cyanSoft-500'
+                        }`}
+                        aria-describedby={errors.monthlyMandatoryExpense ? 'expense-error' : undefined}
+                      />
+                      {errors.monthlyMandatoryExpense && (
+                        <p id="expense-error" className="text-xs font-semibold text-rose-600 flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5" />
+                          {errors.monthlyMandatoryExpense.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="currentEmergencySavings" className="block text-sm font-bold text-resilio-emerald-900">
+                        Total Tabungan / Dana Darurat Likuid Saat Ini (Rp) <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        id="currentEmergencySavings"
+                        type="number"
+                        inputMode="numeric"
+                        {...register('currentEmergencySavings', { valueAsNumber: true })}
+                        placeholder="Contoh: 5000000 (Tulis 0 jika belum ada)"
+                        className={`w-full px-4 py-3 rounded-xl border text-base font-semibold text-resilio-emerald-900 transition-all ${
+                          errors.currentEmergencySavings
+                            ? 'border-rose-500 bg-rose-50/40'
+                            : 'border-resilio-mint-300 focus:border-resilio-cyanSoft-500'
+                        }`}
+                      />
+                      <p className="text-xs text-resilio-emerald-700">
+                        Hitung uang tunai di rekening bank, dompet digital, atau emas likuid yang bisa dicairkan &lt; 24 jam.
+                      </p>
+                    </div>
+                  </fieldset>
+                )}
+
+                {/* STEP 3: Status Pekerjaan, Tanggungan & Hutang */}
+                {currentStep === 3 && (
+                  <fieldset className="space-y-6">
+                    <legend className="text-lg font-bold text-resilio-emerald-900 mb-2">
+                      Langkah 3: Status Pekerjaan, Tanggungan &amp; Cicilan Berjalan
+                    </legend>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="employmentStatus" className="block text-sm font-bold text-resilio-emerald-900">
+                          Status Kontrak Pekerjaan <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                          id="employmentStatus"
+                          {...register('employmentStatus')}
+                          className="w-full px-4 py-3 rounded-xl border border-resilio-mint-300 bg-white text-sm font-medium text-resilio-emerald-900"
+                        >
+                          <option value="permanent_employee">Karyawan Tetap (PKWTT)</option>
+                          <option value="contract_worker">Karyawan Kontrak (PKWT / Outsourcing)</option>
+                          <option value="freelancer_gig">Pekerja Lepas / Harian Lepas</option>
+                          <option value="small_business_owner">Pemilik Usaha Mikro / UMKM</option>
+                          <option value="informal">Sektor Informal / Pedagang Keliling</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label htmlFor="dependentsCount" className="block text-sm font-bold text-resilio-emerald-900">
+                          Jumlah Jiwa Tanggungan (Anak / Orang Tua) <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          id="dependentsCount"
+                          type="number"
+                          inputMode="numeric"
+                          {...register('dependentsCount', { valueAsNumber: true })}
+                          placeholder="Contoh: 2"
+                          className="w-full px-4 py-3 rounded-xl border border-resilio-mint-300 text-sm font-semibold text-resilio-emerald-900"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <label htmlFor="totalActiveDebts" className="block text-sm font-bold text-resilio-emerald-900">
+                        Total Cicilan / Angsuran Utang Per Bulan (Rp) <span className="text-rose-500">*</span>
+                      </label>
+                      <input
+                        id="totalActiveDebts"
+                        type="number"
+                        inputMode="numeric"
+                        {...register('totalActiveDebts', { valueAsNumber: true })}
+                        placeholder="Contoh: 1200000 (Tulis 0 jika bebas utang)"
+                        className="w-full px-4 py-3 rounded-xl border border-resilio-mint-300 text-base font-semibold text-resilio-emerald-900"
+                      />
+                      <p className="text-xs text-resilio-emerald-700">
+                        Termasuk cicilan motor, KPR, paylater, pinjol resmi/koperasi, atau pinjaman kerabat.
+                      </p>
+                    </div>
+                  </fieldset>
+                )}
+
+                {/* STEP 4: Faktor Risiko Terbesar */}
+                {currentStep === 4 && (
+                  <fieldset className="space-y-6">
+                    <legend className="text-lg font-bold text-resilio-emerald-900 mb-2">
+                      Langkah 4: Faktor Risiko &amp; Ketakutan Terbesar Saat Ini
+                    </legend>
+                    <p className="text-xs text-resilio-emerald-700 -mt-2">
+                      Pilih skenario ancaman ekonomi yang paling berpotensi mengguncang stabilitas rumah tangga Anda.
+                    </p>
+
+                    <div className="space-y-3">
+                      {[
+                        {
+                          val: 'layoff_loss_of_income',
+                          title: 'Kehilangan Pekerjaan / PHK / Proyek Sepi',
+                          desc: 'Penghasilan utama berhenti mendadak sementara biaya hidup terus berjalan.',
+                        },
+                        {
+                          val: 'medical_emergency',
+                          title: 'Sakit Keras / Rawat Inap Tulang Punggung Keluarga',
+                          desc: 'Kehilangan nafkah harian saat opname dan biaya pendukung non-BPJS.',
+                        },
+                        {
+                          val: 'inflation_living_costs',
+                          title: 'Lonjakan Harga Kebutuhan Pokok & Sembako',
+                          desc: 'Penghasilan stagnan sementara biaya kontrakan, sekolah, dan pangan melonjak.',
+                        },
+                        {
+                          val: 'debt_predator_trap',
+                          title: 'Jeratan Cicilan / Bunga Pinjaman yang Membengkak',
+                          desc: 'Terjebak gali lubang tutup lubang untuk melunasi angsuran sebelumnya.',
+                        },
+                      ].map((item) => (
+                        <label
+                          key={item.val}
+                          className="flex items-start gap-3 p-4 rounded-2xl border border-resilio-mint-200 hover:border-resilio-cyanSoft-500 hover:bg-resilio-mint-100/50 cursor-pointer transition-all"
+                        >
+                          <input
+                            type="radio"
+                            value={item.val}
+                            {...register('biggestRiskConcern')}
+                            className="mt-1 w-4 h-4 text-resilio-cyanSoft-600 focus:ring-resilio-cyanSoft-500"
+                          />
+                          <div>
+                            <span className="text-sm font-bold text-resilio-emerald-900 block">
+                              {item.title}
+                            </span>
+                            <span className="text-xs text-resilio-emerald-700">
+                              {item.desc}
+                            </span>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                )}
+
+                {/* Navigation Buttons */}
+                <div className="pt-6 border-t border-resilio-mint-200 flex items-center justify-between gap-4">
+                  {currentStep > 1 ? (
+                    <button
+                      type="button"
+                      onClick={handlePrevStep}
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-resilio-emerald-800 bg-resilio-mint-100 hover:bg-resilio-mint-200 transition-colors"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      <span>Kembali</span>
+                    </button>
+                  ) : (
+                    <div />
+                  )}
+
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm text-white bg-resilio-cyanSoft-500 hover:bg-resilio-cyanSoft-600 shadow-md transition-all active:scale-[0.98]"
+                  >
+                    <span>{currentStep === 4 ? 'Analisis & Terbitkan Hasil Skor' : 'Lanjut ke Tahap Berikutnya'}</span>
+                    <ArrowRight className="w-4 h-4 text-white" />
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          ) : (
+            /* Output Engine: Comprehensive Assessment Report */
+            <div className="p-6 sm:p-10 space-y-8 print:p-0">
+              
+              {/* Report Header */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-6 border-b border-resilio-mint-200 gap-4">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-resilio-mint-100 text-resilio-emerald-800 border border-resilio-mint-300">
+                      Hasil Diagnosa Resmi
+                    </span>
+                    <span className="text-xs text-resilio-emerald-600 font-medium">
+                      ID: RES-{Math.floor(100000 + Math.random() * 900000)}
+                    </span>
+                  </div>
+                  <h3 className="text-2xl font-black text-resilio-emerald-900">
+                    Laporan Indeks Ketahanan Finansial Keluarga
+                  </h3>
+                </div>
+
+                <div className="flex items-center gap-2 print:hidden">
+                  <button
+                    type="button"
+                    onClick={handlePrint}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-resilio-mint-100 hover:bg-resilio-mint-200 text-resilio-emerald-800 transition-colors"
+                  >
+                    <Printer className="w-3.5 h-3.5" />
+                    <span>Cetak / Simpan PDF</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleReset}
+                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-resilio-mint-100 hover:bg-resilio-mint-200 text-resilio-emerald-800 transition-colors"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Tes Ulang</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Score Gauge & Key Indicator Matrix */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                
+                {/* Visual Score Badge with Emerald Green (#0F5132) and Fortress Shield Visual */}
+                <div className="lg:col-span-5 p-6 rounded-3xl bg-resilio-emerald-800 text-white text-center flex flex-col items-center justify-center shadow-md border border-resilio-emerald-700 relative overflow-hidden">
+                  <div className="w-24 h-24 mb-2 rounded-2xl overflow-hidden shadow-inner border border-resilio-mint-200/30">
+                    <img
+                      src="/images/fortress-shield.jpg"
+                      alt="Benteng Perlindungan Finansial Resilio"
+                      width={96}
+                      height={96}
+                      loading="lazy"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <span className="text-xs font-bold uppercase tracking-wider text-resilio-mint-200 mb-1">
+                    Skor Ketahanan Finansial
+                  </span>
+                  
+                  <div className="relative my-1">
+                    <span className="text-5xl font-black tracking-tight text-white">
+                      {assessmentResult.score}
+                    </span>
+                    <span className="text-resilio-cyanSoft-300 font-bold text-lg">/100</span>
+                  </div>
+
+                  <div className={`mt-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider ${
+                    assessmentResult.rating === 'vulnerable'
+                      ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                      : assessmentResult.rating === 'moderate'
+                      ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                      : 'bg-resilio-cyanSoft-500/30 text-resilio-mint-100 border border-resilio-cyanSoft-400'
+                  }`}>
+                    {assessmentResult.ratingLabel}
+                  </div>
+                </div>
+
+                {/* 3 Core Indicators with Soft Mint backgrounds (#E8F5E9 / #D1E7DD) */}
+                <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  {/* Indicator 1: Runway */}
+                  <div className="p-4 rounded-2xl bg-resilio-mint-50 border border-resilio-mint-200">
+                    <span className="text-xs text-resilio-emerald-700 font-bold block mb-1">
+                      Emergency Runway
+                    </span>
+                    <p className="text-2xl font-black text-resilio-emerald-900">
+                      {assessmentResult.emergencyRunwayMonths} <span className="text-xs font-normal">Bulan</span>
+                    </p>
+                    <p className="text-[11px] text-resilio-emerald-700 mt-1">
+                      Kapasitas bertahan tanpa pemasukan baru.
+                    </p>
+                  </div>
+
+                  {/* Indicator 2: Debt Service Ratio */}
+                  <div className="p-4 rounded-2xl bg-resilio-mint-50 border border-resilio-mint-200">
+                    <span className="text-xs text-resilio-emerald-700 font-bold block mb-1">
+                      Debt Service Ratio (DSR)
+                    </span>
+                    <p className={`text-2xl font-black ${
+                      assessmentResult.debtToIncomeRatio > 35 ? 'text-rose-600' : 'text-resilio-emerald-900'
+                    }`}>
+                      {assessmentResult.debtToIncomeRatio}%
+                    </p>
+                    <p className="text-[11px] text-resilio-emerald-700 mt-1">
+                      {assessmentResult.debtToIncomeRatio > 35 ? '⚠️ Melebihi batas aman 30%' : '✅ Dalam batas rasio sehat'}
+                    </p>
+                  </div>
+
+                  {/* Indicator 3: Shock Vulnerability */}
+                  <div className="p-4 rounded-2xl bg-resilio-mint-50 border border-resilio-mint-200">
+                    <span className="text-xs text-resilio-emerald-700 font-bold block mb-1">
+                      Vulnerability Index
+                    </span>
+                    <p className={`text-2xl font-black ${
+                      assessmentResult.vulnerabilityIndex === 'Tinggi' ? 'text-rose-600' : 'text-resilio-cyanSoft-600'
+                    }`}>
+                      {assessmentResult.vulnerabilityIndex}
+                    </p>
+                    <p className="text-[11px] text-resilio-emerald-700 mt-1">
+                      Kerentanan terhadap shock ekonomi.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Summary Analysis Banner */}
+              <div className={`p-4 sm:p-5 rounded-2xl border ${
+                assessmentResult.rating === 'vulnerable'
+                  ? 'bg-rose-50 border-rose-200 text-rose-950'
+                  : assessmentResult.rating === 'moderate'
+                  ? 'bg-amber-50 border-amber-200 text-amber-950'
+                  : 'bg-resilio-mint-100 border-resilio-mint-300 text-resilio-emerald-950'
+              }`}>
+                <p className="text-sm font-semibold leading-relaxed">
+                  {assessmentResult.summaryMessage}
+                </p>
+              </div>
+
+              {/* Recommended Mitigation Packages */}
+              <div className="space-y-4">
+                <h4 className="text-base font-black text-resilio-emerald-900 uppercase tracking-wider flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-resilio-cyanSoft-600" />
+                  <span>Paket Rekomendasi Perlindungan Finansial</span>
+                </h4>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {assessmentResult.recommendations.map((rec, rIdx) => (
+                    <div
+                      key={rIdx}
+                      className="p-5 rounded-2xl bg-white border border-resilio-mint-200 shadow-subtle hover:border-resilio-cyanSoft-400 transition-all flex flex-col justify-between"
+                    >
+                      <div>
+                        <div className="flex items-center justify-between mb-2">
+                          <span className={`px-2 py-0.5 rounded text-[11px] font-bold uppercase ${
+                            rec.priority === 'Segera'
+                              ? 'bg-rose-100 text-rose-800'
+                              : rec.priority === 'Penting'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-resilio-mint-100 text-resilio-emerald-800'
+                          }`}>
+                            Prioritas: {rec.priority}
+                          </span>
+                        </div>
+                        <h5 className="text-sm font-black text-resilio-emerald-900 mb-1">
+                          {rec.title}
+                        </h5>
+                        <p className="text-xs text-resilio-emerald-950/80 leading-relaxed">
+                          {rec.description}
+                        </p>
+                      </div>
+
+                      <div className="pt-3 mt-3 border-t border-resilio-mint-100 flex items-center justify-between">
+                        <a
+                          href="#pillars"
+                          className="text-xs font-bold text-resilio-cyanSoft-600 hover:text-resilio-emerald-900 inline-flex items-center gap-1"
+                        >
+                          <span>Aktifkan di 6 Pilar</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Plan 30 Hari */}
+              {assessmentResult.monthlyActionPlan.length > 0 && (
+                <div className="p-5 rounded-2xl bg-resilio-mint-50 border border-resilio-mint-200">
+                  <h5 className="text-xs font-bold uppercase tracking-wider text-resilio-emerald-800 mb-3">
+                    Langkah Aksi Taktis 30 Hari Ke Depan:
+                  </h5>
+                  <ul className="space-y-2">
+                    {assessmentResult.monthlyActionPlan.map((act, aIdx) => (
+                      <li key={aIdx} className="flex items-start gap-2.5 text-xs text-resilio-emerald-950 font-medium">
+                        <CheckCircle2 className="w-4 h-4 text-resilio-cyanSoft-600 shrink-0 mt-0.5" />
+                        <span>{act}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Print Footer */}
+              <div className="pt-4 border-t border-resilio-mint-200 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-resilio-emerald-700">
+                <span>Hasil asesmen ini dihitung berdasarkan data inputan mandiri untuk tujuan mitigasi risiko &amp; edukasi.</span>
+                <button
+                  type="button"
+                  onClick={handleReset}
+                  className="px-4 py-2 bg-resilio-emerald-800 text-white rounded-xl font-bold hover:bg-resilio-emerald-900 transition-colors print:hidden"
+                >
+                  Ulangi Asesmen Baru
+                </button>
+              </div>
+
+            </div>
+          )}
+
+        </div>
+
+      </div>
+    </section>
+  );
+};

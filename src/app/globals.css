@@ -1,0 +1,102 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Palet Emerald & Mint (Modern & Inklusif) */
+    --primary-emerald: #0F5132;
+    --primary-pine: #0D6E6E;
+    --secondary-mint: #D1E7DD;
+    --secondary-mint-light: #E8F5E9;
+    --accent-cyan-soft: #20B2AA;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  }
+
+  body {
+    background-color: #F8FAFC;
+    color: #0F5132;
+    accent-color: #20B2AA;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Modern Web Guidance: Balanced heading typography & pretty body copy */
+  h1, h2, h3, h4, h5, h6 {
+    text-wrap: balance;
+  }
+
+  p, blockquote, li {
+    text-wrap: pretty;
+  }
+
+  /* Accessible high-contrast focus rings styled to Cyan Soft */
+  :focus-visible {
+    outline: 2px solid #20B2AA;
+    outline-offset: 2px;
+  }
+}
+
+@layer utilities {
+  .bg-grid-pattern {
+    background-size: 32px 32px;
+    background-image: 
+      linear-gradient(to right, rgba(15, 81, 50, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 81, 50, 0.05) 1px, transparent 1px);
+  }
+
+  .bg-grid-dark {
+    background-size: 36px 36px;
+    background-image: 
+      linear-gradient(to right, rgba(209, 231, 221, 0.08) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(209, 231, 221, 0.08) 1px, transparent 1px);
+  }
+
+  .text-gradient-resilio {
+    background: linear-gradient(135deg, #0F5132 0%, #0D6E6E 50%, #20B2AA 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .text-gradient-cyan {
+    background: linear-gradient(135deg, #20B2AA 0%, #3CA87E 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .glass-card-mint {
+    background: rgba(232, 245, 233, 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(209, 231, 221, 0.9);
+  }
+
+  .glass-card-dark {
+    background: rgba(15, 81, 50, 0.92);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(209, 231, 221, 0.15);
+  }
+}
+
+/* Custom modern scrollbar styled to Soft Mint & Cyan Soft */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #E8F5E9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #A3D4C0;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #20B2AA;
+}
