@@ -1,3 +1,5 @@
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1e7d949b-f0fb-4489-a8e3-63d416c70aa0" />
+
 # resilio.id — Platform Ketahanan Ekonomi Nasional
 
 [![Next.js](https://img.shields.io/badge/Next.js-14.2.15-0F5132?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
