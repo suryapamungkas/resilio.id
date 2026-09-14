@@ -38,6 +38,7 @@ export default function RootLayout({
   return (
     <html lang="id" className="scroll-smooth">
       <head>
+        <meta name="color-scheme" content="dark" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
@@ -45,7 +46,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-screen bg-resilio-slate-50 text-resilio-navy-800 antialiased selection:bg-resilio-teal-200 selection:text-resilio-navy-950">
+      <body className="min-h-screen bg-resilio-black text-resilio-charcoal-100 antialiased selection:bg-resilio-forest-700 selection:text-white">
         {children}
       </body>
     </html>

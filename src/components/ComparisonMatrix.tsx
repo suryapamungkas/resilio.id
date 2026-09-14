@@ -44,83 +44,83 @@ export const ComparisonMatrix: React.FC = () => {
   ];
 
   return (
-    <section id="comparison" className="py-16 sm:py-24 bg-white border-b border-resilio-mint-200">
+    <section id="comparison" className="py-16 sm:py-24 bg-resilio-black border-b border-resilio-forest-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
         <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-resilio-emerald-800 text-white text-xs font-bold uppercase tracking-wider">
-            <Shield className="w-3.5 h-3.5 text-resilio-cyanSoft-300" />
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-resilio-forest-900/80 border border-resilio-forest-700/60 text-resilio-forest-300 text-xs font-bold uppercase tracking-wider">
+            <Shield className="w-3.5 h-3.5 text-resilio-forest-400" />
             <span>Matriks Komparasi Transparan</span>
           </div>
 
-          <h2 className="text-3xl sm:text-4xl font-black text-resilio-emerald-800 tracking-tight">
+          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
             Mengapa Ekosistem Resilio Berbeda?
           </h2>
 
-          <p className="text-base text-resilio-emerald-950/80 leading-relaxed font-normal">
+          <p className="text-base text-resilio-charcoal-300 leading-relaxed font-normal">
             Bandingkan solusi ketahanan terpadu Resilio dengan jebakan pinjaman predator dan keterbatasan tabungan pasif konvensional.
           </p>
         </div>
 
         {/* Comparison Table */}
-        <div className="overflow-x-auto rounded-3xl border border-resilio-mint-200 shadow-elevated">
+        <div className="overflow-x-auto rounded-3xl border border-resilio-forest-800/80 shadow-elevated bg-resilio-black-surface">
           <table className="w-full text-left border-collapse min-w-[720px]">
             <thead>
-              <tr className="border-b border-resilio-mint-200 bg-resilio-mint-50">
-                <th className="p-5 text-xs font-black uppercase tracking-wider text-resilio-emerald-800 w-1/4">
+              <tr className="border-b border-resilio-forest-800/80 bg-resilio-black-card">
+                <th className="p-5 text-xs font-black uppercase tracking-wider text-resilio-forest-300 w-1/4">
                   Parameter Perlindungan
                 </th>
-                <th className="p-5 text-sm font-black text-white bg-resilio-emerald-800 w-1/3 rounded-t-xl sm:rounded-none">
+                <th className="p-5 text-sm font-black text-white bg-resilio-forest-900/90 border-x border-resilio-forest-700/80 w-1/3">
                   <div className="flex items-center gap-2">
-                    <Shield className="w-4 h-4 text-resilio-cyanSoft-300" />
+                    <Shield className="w-4 h-4 text-resilio-forest-300" />
                     <span>Ekosistem Resilio.id</span>
                   </div>
-                  <span className="text-[10px] font-medium text-resilio-mint-200 block mt-0.5">
+                  <span className="text-[10px] font-medium text-resilio-forest-300 block mt-0.5">
                     Ketahanan Finansial Berkelanjutan
                   </span>
                 </th>
-                <th className="p-5 text-xs font-black text-rose-900 bg-rose-50/70 w-1/5">
+                <th className="p-5 text-xs font-black text-resilio-blood-200 bg-resilio-blood-950/80 border-r border-resilio-blood-900/80 w-1/5">
                   <div className="flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4 text-rose-600" />
+                    <AlertTriangle className="w-4 h-4 text-resilio-blood-400" />
                     <span>Pinjol Ilegal &amp; Rentenir</span>
                   </div>
-                  <span className="text-[10px] font-medium text-rose-700 block mt-0.5">
+                  <span className="text-[10px] font-medium text-resilio-blood-300 block mt-0.5">
                     Skema Jebakan Predator
                   </span>
                 </th>
-                <th className="p-5 text-xs font-black text-resilio-slate-700 bg-resilio-slate-100/70 w-1/5">
+                <th className="p-5 text-xs font-black text-resilio-charcoal-300 bg-resilio-black-surface w-1/5">
                   <div className="flex items-center gap-1.5">
-                    <Building2 className="w-4 h-4 text-resilio-slate-500" />
+                    <Building2 className="w-4 h-4 text-resilio-charcoal-400" />
                     <span>Tabungan Biasa</span>
                   </div>
-                  <span className="text-[10px] font-medium text-resilio-slate-500 block mt-0.5">
+                  <span className="text-[10px] font-medium text-resilio-charcoal-400 block mt-0.5">
                     Tanpa Proteksi Guncangan
                   </span>
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-resilio-mint-200 text-xs sm:text-sm">
+            <tbody className="divide-y divide-resilio-forest-900/80 text-xs sm:text-sm">
               {comparisons.map((row, idx) => (
-                <tr key={idx} className="hover:bg-resilio-mint-50/40 transition-colors">
-                  <td className="p-5 font-bold text-resilio-emerald-900 bg-white">
+                <tr key={idx} className="hover:bg-resilio-forest-950/30 transition-colors">
+                  <td className="p-5 font-bold text-white bg-resilio-black-surface">
                     {row.feature}
                   </td>
-                  <td className="p-5 font-semibold text-resilio-emerald-950 bg-resilio-mint-100/50 border-x border-resilio-mint-200">
+                  <td className="p-5 font-semibold text-resilio-forest-100 bg-resilio-forest-950/60 border-x border-resilio-forest-800">
                     <div className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-resilio-cyanSoft-600 shrink-0 mt-0.5" />
+                      <Check className="w-4 h-4 text-resilio-forest-400 shrink-0 mt-0.5" />
                       <span>{row.resilio}</span>
                     </div>
                   </td>
-                  <td className="p-5 text-rose-900 bg-rose-50/20">
+                  <td className="p-5 text-resilio-blood-200 bg-resilio-blood-950/40 border-r border-resilio-blood-900/80">
                     <div className="flex items-start gap-2">
-                      <X className="w-4 h-4 text-rose-500 shrink-0 mt-0.5" />
+                      <X className="w-4 h-4 text-resilio-blood-400 shrink-0 mt-0.5" />
                       <span>{row.predator}</span>
                     </div>
                   </td>
-                  <td className="p-5 text-resilio-slate-600 bg-resilio-slate-50/40">
+                  <td className="p-5 text-resilio-charcoal-300 bg-resilio-black-card">
                     <div className="flex items-start gap-2">
-                      <Minus className="w-4 h-4 text-resilio-slate-400 shrink-0 mt-0.5" />
+                      <Minus className="w-4 h-4 text-resilio-charcoal-500 shrink-0 mt-0.5" />
                       <span>{row.conventional}</span>
                     </div>
                   </td>

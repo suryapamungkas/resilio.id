@@ -4,23 +4,31 @@
 
 @layer base {
   :root {
-    /* Palet Emerald & Mint (Modern & Inklusif) */
-    --primary-emerald: #0F5132;
-    --primary-pine: #0D6E6E;
-    --secondary-mint: #D1E7DD;
-    --secondary-mint-light: #E8F5E9;
-    --accent-cyan-soft: #20B2AA;
+    /* Dark Mode Enterprise Tokens (Obsidian, Forest Green, Blood Red) */
+    --bg-obsidian: #050807;
+    --bg-surface: #0B130F;
+    --bg-card: #0E1A14;
+    --bg-elevated: #14241D;
+    --forest-primary: #12422D;
+    --forest-accent: #227551;
+    --forest-glow: #2D9668;
+    --blood-primary: #570E0E;
+    --blood-accent: #8B1414;
+    --blood-glow: #C42B2B;
+
+    color-scheme: dark;
   }
 
   html {
     scroll-behavior: smooth;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color-scheme: dark;
   }
 
   body {
-    background-color: #F8FAFC;
-    color: #0F5132;
-    accent-color: #20B2AA;
+    background-color: #050807;
+    color: #E9F0EC;
+    accent-color: #2D9668;
     overflow-x: hidden;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -35,68 +43,81 @@
     text-wrap: pretty;
   }
 
-  /* Accessible high-contrast focus rings styled to Cyan Soft */
+  /* Accessible high-contrast focus rings styled to Forest Emerald */
   :focus-visible {
-    outline: 2px solid #20B2AA;
+    outline: 2px solid #2D9668;
     outline-offset: 2px;
   }
 }
 
 @layer utilities {
   .bg-grid-pattern {
-    background-size: 32px 32px;
+    background-size: 36px 36px;
     background-image: 
-      linear-gradient(to right, rgba(15, 81, 50, 0.05) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(15, 81, 50, 0.05) 1px, transparent 1px);
+      linear-gradient(to right, rgba(45, 150, 104, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(45, 150, 104, 0.07) 1px, transparent 1px);
   }
 
   .bg-grid-dark {
     background-size: 36px 36px;
     background-image: 
-      linear-gradient(to right, rgba(209, 231, 221, 0.08) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(209, 231, 221, 0.08) 1px, transparent 1px);
+      linear-gradient(to right, rgba(30, 48, 38, 0.4) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 48, 38, 0.4) 1px, transparent 1px);
   }
 
   .text-gradient-resilio {
-    background: linear-gradient(135deg, #0F5132 0%, #0D6E6E 50%, #20B2AA 100%);
+    background: linear-gradient(135deg, #FFFFFF 0%, #BEECD7 50%, #2D9668 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .text-gradient-cyan {
-    background: linear-gradient(135deg, #20B2AA 0%, #3CA87E 100%);
+  .text-gradient-blood {
+    background: linear-gradient(135deg, #FACACA 0%, #E35656 50%, #C42B2B 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
-  .glass-card-mint {
-    background: rgba(232, 245, 233, 0.85);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(209, 231, 221, 0.9);
+  .text-gradient-forest {
+    background: linear-gradient(135deg, #E6FAF2 0%, #7ED4AF 50%, #2D9668 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
   .glass-card-dark {
-    background: rgba(15, 81, 50, 0.92);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(209, 231, 221, 0.15);
+    background: rgba(14, 26, 20, 0.85);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(45, 150, 104, 0.2);
+  }
+
+  .glass-card-blood {
+    background: rgba(43, 6, 6, 0.85);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(196, 43, 43, 0.3);
+  }
+
+  .glass-card-mint {
+    background: rgba(18, 36, 28, 0.85);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(45, 150, 104, 0.25);
   }
 }
 
-/* Custom modern scrollbar styled to Soft Mint & Cyan Soft */
+/* Custom dark mode scrollbar styled to Deep Forest & Blood Red */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #E8F5E9;
+  background: #050807;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #A3D4C0;
+  background: #1A3628;
   border-radius: 9999px;
+  border: 1px solid #0E2419;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #20B2AA;
+  background: #2D634B;
 }
