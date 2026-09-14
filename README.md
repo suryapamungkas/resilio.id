@@ -1,4 +1,4 @@
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/1e7d949b-f0fb-4489-a8e3-63d416c70aa0" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a95b1a0a-5f01-43f9-bdc6-a5ac3440f444" />
 
 # resilio.id — Platform Ketahanan Ekonomi Nasional
 
