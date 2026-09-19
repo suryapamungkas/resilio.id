@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { BookOpen, Download, CheckCircle2, Shield } from 'lucide-react';
-import { cn } from '@/lib/utils';
 
 const ebookSchema = z.object({
   fullName: z.string().min(2, 'Nama lengkap minimal 2 karakter'),
@@ -87,12 +87,12 @@ Layanan Hotline Darurat: 0800-140-RESILIO (Bebas Pulsa)
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6">
               {/* Tangible Book Mockup Visual (Realistic Photography) */}
               <div className="w-36 sm:w-44 shrink-0 rounded-2xl overflow-hidden shadow-elevated border-2 border-resilio-forest-700/70 transform -rotate-2 hover:rotate-0 transition-transform duration-300">
-                <img
+                <Image
                   src="/images/ebook-cover.jpg"
                   alt="Sampul E-Book Panduan Selamat Dari Crisis & Shock Ekonomi"
                   width={240}
                   height={320}
-                  loading="lazy"
+                  sizes="(max-width: 640px) 144px, 176px"
                   className="w-full h-auto object-cover brightness-95"
                 />
               </div>

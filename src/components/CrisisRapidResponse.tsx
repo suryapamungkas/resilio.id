@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { crisisGuidesData } from '@/data/crisisGuidesData';
 import { PhoneCall, ChevronRight, FileText, LifeBuoy } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { SectionHeader } from '@/components/SectionHeader';
 
 export const CrisisRapidResponse: React.FC = () => {
   const [activeGuideId, setActiveGuideId] = useState<string>(crisisGuidesData[0].id);
@@ -19,20 +19,13 @@ export const CrisisRapidResponse: React.FC = () => {
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-resilio-blood-950/80 border border-resilio-blood-700/80 text-resilio-blood-300 text-xs font-bold uppercase tracking-wider">
-            <LifeBuoy className="w-3.5 h-3.5 text-resilio-blood-400" />
-            <span>Pusat Tanggap Darurat Finansial 48 Jam</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Protokol Penyelamatan Cepat Saat Krisis Melanda
-          </h2>
-
-          <p className="text-base text-resilio-charcoal-300 leading-relaxed font-normal">
-            Saat shock ekonomi terjadi, keputusan dalam 48 jam pertama sangat menentukan masa depan keluarga Anda. Ikuti panduan teruji kami untuk meminimalkan dampak buruk.
-          </p>
-        </div>
+        <SectionHeader
+          badgeIcon={LifeBuoy}
+          badgeText="Pusat Tanggap Darurat Finansial 48 Jam"
+          badgeTone="blood"
+          title="Protokol Penyelamatan Cepat Saat Krisis Melanda"
+          description="Saat shock ekonomi terjadi, keputusan dalam 48 jam pertama sangat menentukan masa depan keluarga Anda. Ikuti panduan teruji kami untuk meminimalkan dampak buruk."
+        />
 
         {/* Interactive Crisis Switcher & Detail Card */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

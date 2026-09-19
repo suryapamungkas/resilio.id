@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Pillar } from '@/types';
 import { pillarsData } from '@/data/pillarsData';
+import { SectionHeader } from '@/components/SectionHeader';
 import { 
   ShieldAlert, 
   Coins, 
@@ -45,25 +46,43 @@ export const SolutionsGrid: React.FC<SolutionsGridProps> = ({
     return null;
   });
 
+  // Sync modal when selectedPillarId changes from external search selection
+  useEffect(() => {
+    if (selectedPillarId) {
+      const found = pillarsData.find((p) => p.id === selectedPillarId);
+      if (found) {
+        setActiveModalPillar(found);
+      }
+    }
+  }, [selectedPillarId]);
+
+  // Lock background scroll and handle Escape key when modal is open
+  useEffect(() => {
+    if (!activeModalPillar) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setActiveModalPillar(null);
+      }
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeModalPillar]);
+
   return (
     <section id="pillars" className="py-16 sm:py-24 bg-resilio-black relative border-b border-resilio-forest-800/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-4">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-resilio-forest-900/80 border border-resilio-forest-700/60 text-resilio-forest-300 text-xs font-bold uppercase tracking-wider">
-            <Layers className="w-3.5 h-3.5 text-resilio-forest-400" />
-            <span>Arsitektur Ketahanan Ekonomi Nasional</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            6 Pilar Ketahanan Ekonomi Resilio
-          </h2>
-
-          <p className="text-base sm:text-lg text-resilio-charcoal-300 leading-relaxed font-normal">
-            Sistem terintegrasi berstandar enterprise yang dirancang khusus untuk melindungi keluarga dan komunitas dari risiko guncangan ekonomi tak terduga.
-          </p>
-        </div>
+        <SectionHeader
+          badgeIcon={Layers}
+          badgeText="Arsitektur Ketahanan Ekonomi Nasional"
+          title="6 Pilar Ketahanan Ekonomi Resilio"
+          description="Sistem terintegrasi berstandar enterprise yang dirancang khusus untuk melindungi keluarga dan komunitas dari risiko guncangan ekonomi tak terduga."
+        />
 
         {/* 6 Pillars Cards Grid (Dark Enterprise Style Grid) */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

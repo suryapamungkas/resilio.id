@@ -14,6 +14,7 @@ export interface FinancialHealthInputs {
 export type ResilienceRating = 'vulnerable' | 'moderate' | 'strong';
 
 export interface FinancialHealthResult {
+  assessmentId: string;
   score: number; // 0 - 100
   rating: ResilienceRating;
   ratingLabel: string;

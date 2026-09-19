@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Calculator, ShieldCheck, Coins, Check } from 'lucide-react';
-import { cn, formatIDR } from '@/lib/utils';
+import { formatIDR } from '@/lib/utils';
+import { SectionHeader } from '@/components/SectionHeader';
 
 export const EmergencyCalculator: React.FC = () => {
   const [monthlySavings, setMonthlySavings] = useState<number>(300000);
@@ -12,46 +13,40 @@ export const EmergencyCalculator: React.FC = () => {
   const dailyEquivalent = Math.round(monthlySavings / 30);
   const annualYieldRate = 0.055;
 
-  const calculateAccumulation = (months: number) => {
-    let total = 0;
-    const monthlyRate = annualYieldRate / 12;
-    for (let i = 0; i < months; i++) {
-      total = (total + monthlySavings) * (1 + monthlyRate);
-    }
-    return Math.round(total);
-  };
-
-  const accum6m = calculateAccumulation(6);
-  const accum12m = calculateAccumulation(12);
-  const accum24m = calculateAccumulation(24);
+  const { accum6m, accum12m, accum24m } = useMemo(() => {
+    const calc = (months: number) => {
+      let total = 0;
+      const monthlyRate = annualYieldRate / 12;
+      for (let i = 0; i < months; i++) {
+        total = (total + monthlySavings) * (1 + monthlyRate);
+      }
+      return Math.round(total);
+    };
+    return {
+      accum6m: calc(6),
+      accum12m: calc(12),
+      accum24m: calc(24),
+    };
+  }, [monthlySavings, annualYieldRate]);
 
   const targetBufferGoal = estimatedMonthlyExpense * targetMonthsBuffer;
-  const monthsToReachGoal = Math.ceil(targetBufferGoal / (monthlySavings * 1.025));
+  const monthsToReachGoal = Math.ceil(targetBufferGoal / (Math.max(monthlySavings, 1) * 1.025));
 
   const hospitalCashDaily = monthlySavings >= 500000 ? 250000 : 150000;
   const layoffTransitionCash = monthlySavings >= 500000 ? 3000000 : 1500000;
   const accidentAssistanceCash = monthlySavings >= 500000 ? 5000000 : 2500000;
-
 
   return (
     <section id="calculator" className="py-16 sm:py-24 bg-resilio-black border-b border-resilio-forest-800/60 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16 space-y-3">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-resilio-forest-900/80 border border-resilio-forest-700/60 text-resilio-forest-300 text-xs font-bold uppercase tracking-wider">
-            <Calculator className="w-3.5 h-3.5 text-resilio-forest-400" />
-            <span>Simulasi Mikro Cerdas</span>
-          </div>
-
-          <h2 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
-            Kalkulator Alokasi Dana Darurat &amp; Proteksi Mikro
-          </h2>
-
-          <p className="text-base text-resilio-charcoal-300 leading-relaxed font-normal">
-            Cukup sisihkan mulai Rp 5.000 hingga Rp 10.000 per hari. Lihat bagaimana akumulasi mikro membangun benteng likuiditas sekaligus mengaktifkan proteksi guncangan ekonomi secara otomatis.
-          </p>
-        </div>
+        <SectionHeader
+          badgeIcon={Calculator}
+          badgeText="Simulasi Mikro Cerdas"
+          title="Kalkulator Alokasi Dana Darurat & Proteksi Mikro"
+          description="Cukup sisihkan mulai Rp 5.000 hingga Rp 10.000 per hari. Lihat bagaimana akumulasi mikro membangun benteng likuiditas sekaligus mengaktifkan proteksi guncangan ekonomi secara otomatis."
+        />
 
         {/* 2-Column Interactive Simulator */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

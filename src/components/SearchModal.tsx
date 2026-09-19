@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Search, X, ShieldAlert, ArrowRight, BookOpen, AlertTriangle, Calculator, FileText } from 'lucide-react';
 import { pillarsData } from '@/data/pillarsData';
 import { crisisGuidesData } from '@/data/crisisGuidesData';
@@ -11,9 +11,34 @@ interface SearchModalProps {
   onSelectPillar: (pillarId: string) => void;
 }
 
+const ALL_TOOLS = [
+  {
+    id: 'health-check',
+    title: 'Financial Health Check (Early Warning 4-Langkah)',
+    category: 'Alat Interaktif',
+    href: '#health-check',
+    icon: ShieldAlert,
+  },
+  {
+    id: 'calculator',
+    title: 'Kalkulator Simulasi Dana Darurat & Asuransi Mikro',
+    category: 'Alat Interaktif',
+    href: '#calculator',
+    icon: Calculator,
+  },
+  {
+    id: 'ebook',
+    title: 'E-Book: Panduan Selamat dari Crisis & Shock Ekonomi (Gratis)',
+    category: 'E-Book & Edukasi',
+    href: '#ebook',
+    icon: BookOpen,
+  },
+];
+
 export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSelectPillar }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Keyboard shortcut listener for Ctrl+K and ESC
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
@@ -29,48 +54,44 @@ export const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose, onSel
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  // Lock body scroll when search modal is open
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const query = searchQuery.toLowerCase().trim();
 
-  const filteredPillars = pillarsData.filter(
-    (p) =>
-      p.title.toLowerCase().includes(query) ||
-      p.subtitle.toLowerCase().includes(query) ||
-      p.description.toLowerCase().includes(query) ||
-      p.category.toLowerCase().includes(query)
-  );
+  const filteredPillars = useMemo(() => {
+    if (!query) return pillarsData;
+    return pillarsData.filter(
+      (p) =>
+        p.title.toLowerCase().includes(query) ||
+        p.subtitle.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        p.category.toLowerCase().includes(query)
+    );
+  }, [query]);
 
-  const filteredGuides = crisisGuidesData.filter(
-    (g) =>
-      g.title.toLowerCase().includes(query) ||
-      g.summary.toLowerCase().includes(query) ||
-      g.category.toLowerCase().includes(query)
-  );
+  const filteredGuides = useMemo(() => {
+    if (!query) return crisisGuidesData;
+    return crisisGuidesData.filter(
+      (g) =>
+        g.title.toLowerCase().includes(query) ||
+        g.summary.toLowerCase().includes(query) ||
+        g.category.toLowerCase().includes(query)
+    );
+  }, [query]);
 
-  const tools = [
-    {
-      id: 'health-check',
-      title: 'Financial Health Check (Early Warning 4-Langkah)',
-      category: 'Alat Interaktif',
-      href: '#health-check',
-      icon: ShieldAlert,
-    },
-    {
-      id: 'calculator',
-      title: 'Kalkulator Simulasi Dana Darurat & Asuransi Mikro',
-      category: 'Alat Interaktif',
-      href: '#calculator',
-      icon: Calculator,
-    },
-    {
-      id: 'ebook',
-      title: 'E-Book: Panduan Selamat dari Crisis & Shock Ekonomi (Gratis)',
-      category: 'E-Book & Edukasi',
-      href: '#ebook',
-      icon: BookOpen,
-    },
-  ].filter((t) => t.title.toLowerCase().includes(query) || t.category.toLowerCase().includes(query));
+  const tools = useMemo(() => {
+    if (!query) return ALL_TOOLS;
+    return ALL_TOOLS.filter((t) => t.title.toLowerCase().includes(query) || t.category.toLowerCase().includes(query));
+  }, [query]);
+
+  if (!isOpen) return null;
 
   return (
     <div

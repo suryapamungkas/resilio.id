@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { AudienceSegment } from '@/types';
 import { 
   ShieldCheck, 
@@ -10,7 +11,6 @@ import {
   Coins, 
   Clock, 
   CheckCircle2, 
-  Users, 
   Building2 
 } from 'lucide-react';
 
@@ -130,13 +130,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               
               {/* Dynamic Image Container (Authentic Documentary Photography) */}
               <div className="relative rounded-3xl overflow-hidden shadow-elevated border-2 border-resilio-forest-800/80 bg-resilio-black-surface group">
-                <img
+                <Image
                   src={isIndividual ? "/images/hero-family.jpg" : "/images/community-aid.jpg"}
                   alt={isIndividual ? "Dokumenter Ketahanan Finansial Keluarga Indonesia" : "Dokumenter Gotong Royong Komunitas Warga"}
                   width={640}
                   height={480}
-                  // @ts-ignore fetchPriority support
-                  fetchPriority="high"
+                  priority
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 640px"
                   className="w-full h-auto object-cover transform group-hover:scale-102 transition-transform duration-500 brightness-95"
                 />
 

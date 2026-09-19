@@ -70,36 +70,6 @@
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-
-  .text-gradient-blood {
-    background: linear-gradient(135deg, #FACACA 0%, #E35656 50%, #C42B2B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .text-gradient-forest {
-    background: linear-gradient(135deg, #E6FAF2 0%, #7ED4AF 50%, #2D9668 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-  }
-
-  .glass-card-dark {
-    background: rgba(14, 26, 20, 0.85);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(45, 150, 104, 0.2);
-  }
-
-  .glass-card-blood {
-    background: rgba(43, 6, 6, 0.85);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(196, 43, 43, 0.3);
-  }
-
-  .glass-card-mint {
-    background: rgba(18, 36, 28, 0.85);
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(45, 150, 104, 0.25);
-  }
 }
 
 /* Custom dark mode scrollbar styled to Deep Forest & Blood Red */

@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { AudienceSegment } from '@/types';
 import { Navbar } from '@/components/Navbar';
 import { HeroSection } from '@/components/HeroSection';
@@ -12,41 +13,46 @@ import { ComparisonMatrix } from '@/components/ComparisonMatrix';
 import { TestimonialsSection } from '@/components/TestimonialsSection';
 import { LeadCaptureSection } from '@/components/LeadCaptureSection';
 import { Footer } from '@/components/Footer';
-import { SearchModal } from '@/components/SearchModal';
+
+// Dynamic code-splitting for quick-search palette modal
+const SearchModal = dynamic(
+  () => import('@/components/SearchModal').then((mod) => mod.SearchModal),
+  { ssr: false }
+);
 
 export default function HomePage() {
   const [currentSegment, setCurrentSegment] = useState<AudienceSegment>('individuals');
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [selectedPillarFromSearch, setSelectedPillarFromSearch] = useState<string | null>(null);
 
-  const handleStartAssessment = () => {
+  const handleStartAssessment = useCallback(() => {
     const el = document.getElementById('health-check');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  const handleExplorePillars = () => {
+  const handleExplorePillars = useCallback(() => {
     const el = document.getElementById('pillars');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  const handleOpenCalculator = () => {
+  const handleOpenCalculator = useCallback(() => {
     const el = document.getElementById('calculator');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
-  const handleSelectPillar = (pillarId: string) => {
+  const handleSelectPillar = useCallback((pillarId: string) => {
     setSelectedPillarFromSearch(pillarId);
     const el = document.getElementById('pillars');
     if (el) {
       el.scrollIntoView({ behavior: 'smooth' });
     }
-  };
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
